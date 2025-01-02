@@ -1,0 +1,20 @@
+canvas {
+    justify-content: center;
+    align-items: center;
+    height: auto;
+}
+
+video {
+    justify-content: center;
+    align-items: center;
+    height: auto;
+}
+
+img {
+    justify-content: center;
+    align-items: center;
+    height: auto;
+}
+body {
+    color: black;
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Photo Capture</title>
+</head>
+<body>
+    <link rel="stylesheet" href="style.css">
+    <h1>Automatic Photo Capture</h1>
+
+    <!-- Video untuk menampilkan stream dari kamera -->
+    <video id="video" width="320" height="240" autoplay></video>
+
+    <!-- Canvas untuk menangkap foto -->
+    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+    <!-- Tampilkan foto setelah diambil -->
+    <img id="photo" width="320" height="240" />
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photo = document.getElementById('photo');
+
+        // Memulai kamera secara otomatis
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                // Menampilkan video dari kamera
+                video.srcObject = stream;
+
+                // Setelah video dimuat, ambil foto otomatis
+                video.onloadeddata = function() {
+                    capturePhoto();
+                };
+            })
+            .catch((err) => {
+                console.error("Error accessing camera:", err);
+            });
+
+        // Fungsi untuk mengambil foto dari stream video
+        function capturePhoto() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Gambar snapshot dari video ke canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Tampilkan hasilnya ke dalam elemen img
+            const dataUrl = canvas.toDataURL('image/png');
+            photo.src = dataUrl;  // Set image source ke hasil foto
+
+            // Kirim foto ke server menggunakan fetch
+            fetch('/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: dataUrl }) // Kirim data URL foto
+            })
+            .then(response => response.json())
+            .then(data => console.log('Foto berhasil diunggah:', data))
+            .catch(error => console.error('Error uploading photo:', error));
+        }
+    </script>
+</body>
+</html>
